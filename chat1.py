@@ -3,7 +3,7 @@ import fitz
 import json
 import unicodedata
 
-# Fonction pour extraire le texte d'un PDF
+# extraire le texte d'un PDF
 def extract_text_from_pdf(pdf_path):
     text = ""
     doc = fitz.open(pdf_path)
@@ -12,7 +12,7 @@ def extract_text_from_pdf(pdf_path):
         text += page.get_text("text") + "\n"  # Ajout d'un saut de ligne entre les pages
     return text.strip()
 
-#Fonction pour nettoyer le nom des fichiers
+#nettoyer le nom des fichiers
 def clean_file_name(file_name):
     file_name = unicodedata.normalize('NFD', file_name).encode('ascii', 'ignore').decode('ascii')
     return file_name.replace(" ", "_")
@@ -20,11 +20,8 @@ def clean_file_name(file_name):
 #Répertoire contenant les PDFs
 pdf_directory = r"C:\Users\USER\Desktop\DOC PFE\Data Base Regulation\pdf_directory"
 output_json_path = r"C:\Users\USER\Desktop\DOC PFE\Data Base Regulation/regulatory_documents.json"  # Où sauvegarder le JSON
-
-#Stockage des documents sous format JSON
 documents = {}
 
-# **Add error handling to print a helpful message if the directory is not found.**
 if not os.path.exists(pdf_directory):
     print(f"Error: The directory '{pdf_directory}' does not exist. Please check the path and try again.")
 else:
