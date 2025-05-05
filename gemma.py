@@ -4,7 +4,7 @@ from pinecone import Pinecone
 import torch
 from huggingface_hub import login
 
-# Authentification Hugging Face
+#Hugging Face
 login(token="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")
 
 # Initialisation de Pinecone
@@ -13,8 +13,8 @@ pc = Pinecone(api_key=api_key)
 index_name = "regulatory-documents"
 index = pc.Index(index_name)
 
-# Charger le modèle Gemma (2B ou 7B selon tes capacités)
-gemma_model_name = "google/gemma-2b"  # ou "google/gemma-7b"
+# Charger le modèle Gemma
+gemma_model_name = "google/gemma-2b"  
 gemma_tokenizer = AutoTokenizer.from_pretrained(gemma_model_name)
 gemma_model = AutoModelForCausalLM.from_pretrained(
     gemma_model_name,
@@ -22,13 +22,13 @@ gemma_model = AutoModelForCausalLM.from_pretrained(
     device_map="auto" if torch.cuda.is_available() else None
 )
 
-# Fonction pour rechercher des documents pertinents dans Pinecone
+# rechercher des documents dans Pinecone
 def search_documents(query_text, top_k=3):
-    query_embedding = get_labse_embedding(query_text)  # Tu dois avoir cette fonction définie
+    query_embedding = get_labse_embedding(query_text)  
     results = index.query(vector=query_embedding, top_k=top_k, include_metadata=True)
     return results["matches"]
 
-# Fonction pour générer une réponse avec Gemma
+# générer une réponse avec Gemma
 def generate_response_with_gemma(query_text, context_texts):
     context = "\n".join(context_texts)
     prompt = f"""Vous êtes un assistant expert en réglementation médicale. Répondez à la question en utilisant les informations suivantes :
@@ -54,19 +54,18 @@ Réponse :"""
     response = gemma_tokenizer.decode(outputs[0], skip_special_tokens=True)
     return response[len(prompt):].strip()  # Nettoyer le prompt dans la réponse
 
-# Fonction principale pour interroger et générer une réponse
+# interroger et générer une réponse
 def query_and_generate_response(query_text):
     relevant_docs = search_documents(query_text, top_k=3)
     context_texts = [documents[doc["id"]] for doc in relevant_docs]
     response = generate_response_with_gemma(query_text, context_texts)
     return response
 
-# Charger les documents depuis le fichier JSON
+# Charger les docs depuis JSON
 def load_documents_from_json(json_path):
     with open(json_path, "r", encoding="utf-8") as json_file:
         return json.load(json_file)
 
-# Charger les documents
 json_path = r"C:\Users\hp\Desktop\regulatory_documents.json"
 documents = load_documents_from_json(json_path)
 
