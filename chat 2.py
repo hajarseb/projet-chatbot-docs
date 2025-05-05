@@ -14,10 +14,10 @@ index_name = "regulatory-documents"
 if index_name in pc.list_indexes().names():
     pc.delete_index(index_name)
 
-# Créer un nouvel index avec LaBSE (dimension 768)
+# Créer un nouvel index avec LaBSE 
 pc.create_index(
     name=index_name,
-    dimension=768,  # LaBSE a une dimension de sortie de 768
+    dimension=768,  
     metric="cosine",
     spec=ServerlessSpec(cloud="aws", region="us-east-1")
 )
@@ -28,7 +28,7 @@ index = pc.Index(index_name)
 labse_model = AutoModel.from_pretrained("sentence-transformers/LaBSE")
 labse_tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/LaBSE")
 
-#Fonction pour générer les embeddings avec LaBSE
+#générer les embeddings avec LaBSE
 def get_labse_embedding(text):
     tokens = labse_tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
     with torch.no_grad():
