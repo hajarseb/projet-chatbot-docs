@@ -5,10 +5,10 @@ from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM
 from pinecone import Pinecone
 
-# Initialisation FastAPI
+# FastAPI
 app = FastAPI()
 
-# Initialisation de Pinecone
+# Pinecone
 api_key = "pcsk_27dxcZ_CWpETpMZHG4kcGGoyY51WdfD3kR8txV1iPXVyUyAx3EUt3fpLQbqZhspgsLvYvs"
 pc = Pinecone(api_key=api_key)
 index = pc.Index("regulatory-documents")
@@ -26,7 +26,7 @@ gemma_model = AutoModelForCausalLM.from_pretrained(
     device_map="auto" if torch.cuda.is_available() else None
 )
 
-# Compiler le modèle pour accélérer l'inférence (si PyTorch >= 2.0)
+# accélérer l'inférence 
 if torch.cuda.is_available() and hasattr(torch, 'compile'):
     gemma_model = torch.compile(gemma_model)
 
@@ -38,14 +38,14 @@ def load_documents_from_json(json_path):
 json_path = r"C:\Users\USER\Desktop\DOC PFE\Data Base Regulation/regulatory_documents.json"
 documents = load_documents_from_json(json_path)
 
-# Index rapide des documents (avec vérification)
+# Index rapide des documents 
 doc_lookup = {}
 for doc in documents:
     if isinstance(doc, dict) and "doc_id" in doc and "text" in doc:
         doc_lookup[doc["doc_id"]] = doc["text"]
 
 
-# Fonction pour obtenir un embedding avec LaBSE
+# obtenir un embedding avec LaBSE
 def get_labse_embedding(text):
     tokens = labse_tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
     with torch.no_grad():
@@ -53,7 +53,7 @@ def get_labse_embedding(text):
     embeddings = output.pooler_output
     return embeddings.squeeze().tolist()
 
-# Fonction pour générer une réponse avec Gemma
+# générer une réponse avec Gemma
 def generate_response_with_gemma(query_text, context_texts):
     context = "\n".join(context_texts)
     prompt = f"""Vous êtes un assistant expert en réglementation médicale. Répondez à la question en utilisant les informations suivantes :
@@ -78,7 +78,7 @@ Réponse :"""
 
     response = gemma_tokenizer.decode(outputs[0], skip_special_tokens=True)
     return response[len(prompt):].strip()
-# Fonction pour nettoyer les doublons dans la réponse générée
+# nettoyer les doublons dans la réponse générée
 def clean_response(response):
     lines = response.split('\n')
     seen = set()
@@ -90,7 +90,7 @@ def clean_response(response):
             seen.add(line)
     return '\n'.join(cleaned)
 
-# Schéma de la requête entrante
+# la requête entrante
 class QuestionRequest(BaseModel):
     query: str
 
